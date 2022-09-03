@@ -15,7 +15,9 @@ class ProductItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final product = Provider.of<Product>(
       context,
+      listen: false,
     );
+    print('Product rebuilds');
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: GridTile(
@@ -32,14 +34,16 @@ class ProductItem extends StatelessWidget {
           ),
         ),
         footer: GridTileBar(
-          leading: IconButton(
-            onPressed: () {
-              product.toggleFavouriteStatus();
-            },
-            icon: Icon(
-              product.isFavourite ? Icons.favorite : Icons.favorite_border,
+          leading: Consumer<Product>(
+            builder: (context, product, _) => IconButton(
+              color: Colors.deepOrange,
+              icon: Icon(
+                product.isFavourite ? Icons.favorite : Icons.favorite_border,
+              ),
+              onPressed: () {
+                product.toggleFavouriteStatus();
+              },
             ),
-            color: Theme.of(context).colorScheme.secondary,
           ),
           trailing: IconButton(
             onPressed: () {},
