@@ -17,15 +17,17 @@ class _EditProductsScreenState extends State<EditProductsScreen> {
       body: Padding(
         padding: const EdgeInsets.all(15.0),
         child: Form(
-          child: ListView(
-            children: [
-              TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Title',
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: 'Title',
+                  ),
+                  textInputAction: TextInputAction.next,
                 ),
-                textInputAction: TextInputAction.next,
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
