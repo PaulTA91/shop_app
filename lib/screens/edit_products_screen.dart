@@ -8,6 +8,29 @@ class EditProductsScreen extends StatefulWidget {
 }
 
 class _EditProductsScreenState extends State<EditProductsScreen> {
+  final _imageURLController = TextEditingController();
+  final _imageURLFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    _imageURLFocusNode.addListener(_updateImageURL);
+    super.initState();
+  }
+
+  void _updateImageURL() {
+    if (!_imageURLFocusNode.hasFocus) {
+      setState(() {});
+    }
+  }
+
+  @override
+  void dispose() {
+    _imageURLFocusNode.removeListener(_updateImageURL);
+    _imageURLController.dispose();
+    _imageURLFocusNode.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,6 +63,42 @@ class _EditProductsScreenState extends State<EditProductsScreen> {
                   maxLines: 3,
                   keyboardType: TextInputType.multiline,
                 ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      width: 100,
+                      height: 100,
+                      margin: EdgeInsets.only(
+                        top: 8,
+                        right: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          width: 1,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      child: _imageURLController.text.isEmpty
+                          ? Text("Enter a URL")
+                          : FittedBox(
+                              child: Image.network(_imageURLController.text),
+                              fit: BoxFit.contain,
+                            ),
+                    ),
+                    Expanded(
+                        child: TextFormField(
+                      decoration: InputDecoration(labelText: 'Image URL'),
+                      keyboardType: TextInputType.url,
+                      textInputAction: TextInputAction.done,
+                      controller: _imageURLController,
+                      focusNode: _imageURLFocusNode,
+                      onEditingComplete: () {
+                        setState(() {});
+                      },
+                    )),
+                  ],
+                )
               ],
             ),
           ),
