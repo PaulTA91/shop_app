@@ -29,6 +29,13 @@ class _EditProductsScreenState extends State<EditProductsScreen> {
 
   void _updateImageURL() {
     if (!_imageURLFocusNode.hasFocus) {
+      if ((!_imageURLController.text.startsWith('http') &&
+              !_imageURLController.text.startsWith('https')) ||
+          (!_imageURLController.text.endsWith('png') &&
+              !_imageURLController.text.endsWith('jpg') &&
+              !_imageURLController.text.endsWith('jpeg'))) {
+        return;
+      }
       setState(() {});
     }
   }
@@ -42,6 +49,10 @@ class _EditProductsScreenState extends State<EditProductsScreen> {
   }
 
   void _saveForm() {
+    final isValid = _form.currentState.validate();
+    if (!isValid) {
+      return;
+    }
     _form.currentState.save();
     print(_editedProduct.title);
     print(_editedProduct.price);
@@ -70,6 +81,12 @@ class _EditProductsScreenState extends State<EditProductsScreen> {
             child: Column(
               children: [
                 TextFormField(
+                  validator: ((value) {
+                    if (value.isEmpty) {
+                      return 'Please provide a title';
+                    }
+                    return null;
+                  }),
                   decoration: InputDecoration(
                     labelText: 'Title',
                   ),
@@ -84,6 +101,18 @@ class _EditProductsScreenState extends State<EditProductsScreen> {
                   },
                 ),
                 TextFormField(
+                  validator: ((value) {
+                    if (value.isEmpty) {
+                      return 'Please provide a price value';
+                    }
+                    if (double.tryParse(value) == null) {
+                      return 'Please enter a valid number.';
+                    }
+                    if (double.parse(value) <= 0) {
+                      return 'Please neter a number greater than 0';
+                    }
+                    return null;
+                  }),
                   decoration: InputDecoration(
                     labelText: 'Price',
                   ),
@@ -99,6 +128,15 @@ class _EditProductsScreenState extends State<EditProductsScreen> {
                   },
                 ),
                 TextFormField(
+                  validator: ((value) {
+                    if (value.isEmpty) {
+                      return 'Please provide a description';
+                    }
+                    if (value.length < 10) {
+                      return 'Minimum 10 characters for description';
+                    }
+                    return null;
+                  }),
                   decoration: InputDecoration(
                     labelText: 'Description',
                   ),
@@ -138,6 +176,21 @@ class _EditProductsScreenState extends State<EditProductsScreen> {
                     ),
                     Expanded(
                       child: TextFormField(
+                        validator: ((value) {
+                          if (value.isEmpty) {
+                            return 'Please provide a URL for the image';
+                          }
+                          if (!value.startsWith('http') &&
+                              !value.startsWith('https')) {
+                            return 'Please enter a valid URL';
+                          }
+                          if (!value.endsWith('png') &&
+                              !value.endsWith('jpg') &&
+                              !value.endsWith('jpeg')) {
+                            return 'Image must be a JPG or PNG';
+                          }
+                          return null;
+                        }),
                         decoration: InputDecoration(labelText: 'Image URL'),
                         keyboardType: TextInputType.url,
                         textInputAction: TextInputAction.done,
