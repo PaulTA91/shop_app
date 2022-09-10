@@ -51,7 +51,7 @@ class CartScreen extends StatelessWidget {
                       );
                       cart.clear();
                     },
-                    Widget: Text("Order Now"),
+                    child: Text("Order Now"),
                   )
                 ],
               ),
