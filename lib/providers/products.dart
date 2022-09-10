@@ -1,6 +1,9 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
 
-import 'product.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+import './product.dart';
 
 class Products with ChangeNotifier {
   List<Product> _items = [
@@ -37,56 +40,69 @@ class Products with ChangeNotifier {
           'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
     ),
   ];
-
-  var _showFavouritesOnly = false;
+  // var _showFavoritesOnly = false;
 
   List<Product> get items {
-    // if (_showFavouritesOnly) {
-    //   return _items.where((prodItem) => prodItem.isFavourite).toList();
+    // if (_showFavoritesOnly) {
+    //   return _items.where((prodItem) => prodItem.isFavorite).toList();
     // }
     return [..._items];
   }
 
-  List<Product> get favouriteItems {
-    return _items.where((element) => element.isFavourite).toList();
+  List<Product> get favoriteItems {
+    return _items.where((prodItem) => prodItem.isFavourite).toList();
   }
 
-  Product findByID(String id) {
-    return _items.firstWhere((element) => element.id == id);
+  Product findById(String id) {
+    return _items.firstWhere((prod) => prod.id == id);
   }
 
-  void addProduct(Product product) {
-    final newProduct = Product(
-      id: DateTime.now().toString(),
-      title: product.title,
-      description: product.description,
-      price: product.price,
-      imageURL: product.imageURL,
-    );
-    _items.add(newProduct);
-    notifyListeners();
-  }
-
-  void updateProduct(String id, Product newProduct) {
-    final prodIndex = items.indexWhere((element) => element.id == id);
-    if (prodIndex >= 0) {
-      _items[prodIndex] = newProduct;
-      notifyListeners();
-    }
-  }
-
-  void deleteProduct(String id) {
-    _items.removeWhere((element) => element.id == id);
-    notifyListeners();
-  }
-
-  // void showFavouritesOnly() {
-  //   _showFavouritesOnly = true;
+  // void showFavoritesOnly() {
+  //   _showFavoritesOnly = true;
   //   notifyListeners();
   // }
 
   // void showAll() {
-  //   _showFavouritesOnly = false;
+  //   _showFavoritesOnly = false;
   //   notifyListeners();
   // }
+
+  void addProduct(Product product) {
+    final url = Uri.https('flutter-update.firebaseio.com', '/products.json');
+    http.post(
+      url,
+      body: json.encode({
+        'title': product.title,
+        'description': product.description,
+        'imageURL': product.imageURL,
+        'price': product.price,
+        'isFavourite': product.isFavourite,
+      }),
+    );
+    final newProduct = Product(
+      title: product.title,
+      description: product.description,
+      price: product.price,
+      imageURL: product.imageURL,
+      id: DateTime.now().toString(),
+    );
+    _items.add(newProduct);
+    // _items.insert(0, newProduct); // at the start of the list
+    notifyListeners();
+  }
+
+  void updateProduct(String id, Product newProduct) {
+    final prodIndex = _items.indexWhere((prod) => prod.id == id);
+    if (prodIndex >= 0) {
+      _items[prodIndex] = newProduct;
+      notifyListeners();
+    } else {
+      print('...');
+    }
+  }
+
+  void deleteProduct(String id) {
+    _items.removeWhere((prod) => prod.id == id);
+    notifyListeners();
+  }
 }
