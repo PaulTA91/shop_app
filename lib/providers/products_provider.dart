@@ -42,7 +42,7 @@ class Products with ChangeNotifier {
     ),
   ];
 
-  var _showFavouritesOnly = false;
+  // var _showFavouritesOnly = false;
 
   List<Product> get items {
     // if (_showFavouritesOnly) {
@@ -63,7 +63,8 @@ class Products with ChangeNotifier {
     final url = Uri.https(
         'flutter-shop-app-87bde-default-rtdb.europe-west1.firebasedatabase.app',
         '/products.json');
-    http.post(
+    http
+        .post(
       url,
       body: json.encode({
         'title': product.title,
@@ -72,17 +73,18 @@ class Products with ChangeNotifier {
         'price': product.price,
         'isFavorite': product.isFavourite,
       }),
-    );
-
-    final newProduct = Product(
-      id: DateTime.now().toString(),
-      title: product.title,
-      description: product.description,
-      price: product.price,
-      imageURL: product.imageURL,
-    );
-    _items.add(newProduct);
-    notifyListeners();
+    )
+        .then((response) {
+      final newProduct = Product(
+        id: jsonDecode(response.body)['name'],
+        title: product.title,
+        description: product.description,
+        price: product.price,
+        imageURL: product.imageURL,
+      );
+      _items.add(newProduct);
+      notifyListeners();
+    });
   }
 
   void updateProduct(String id, Product newProduct) {
