@@ -59,30 +59,29 @@ class Products with ChangeNotifier {
     return _items.firstWhere((element) => element.id == id);
   }
 
-  void addProduct(Product product) {
-    final url = Uri.https(
-        'flutter-shop-app-87bde-default-rtdb.europe-west1.firebasedatabase.app',
-        '/products.json');
-    http
+  Future<void> addProduct(Product product) {
+    final url = Uri.https('flutter-update.firebaseio.com', '/products.json');
+    return http
         .post(
       url,
       body: json.encode({
         'title': product.title,
         'description': product.description,
-        'imageUrl': product.imageURL,
+        'imageURL': product.imageURL,
         'price': product.price,
-        'isFavorite': product.isFavourite,
+        'isFavourite': product.isFavourite,
       }),
     )
-        .then((response) {
+        .then((value) {
       final newProduct = Product(
-        id: jsonDecode(response.body)['name'],
         title: product.title,
         description: product.description,
         price: product.price,
         imageURL: product.imageURL,
+        id: DateTime.now().toString(),
       );
       _items.add(newProduct);
+      // _items.insert(0, newProduct); // at the start of the list
       notifyListeners();
     });
   }
