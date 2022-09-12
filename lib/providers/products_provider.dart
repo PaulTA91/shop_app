@@ -60,29 +60,33 @@ class Products with ChangeNotifier {
   }
 
   Future<void> addProduct(Product product) {
-    final url = Uri.https('flutter-update.firebaseio.com', '/products.json');
+    final url = Uri.parse(
+        'https://flutter-shop-app-87bde-default-rtdb.europe-west1.firebasedatabase.app/products.json');
     return http
         .post(
       url,
       body: json.encode({
         'title': product.title,
         'description': product.description,
-        'imageURL': product.imageURL,
+        'imageUrl': product.imageURL,
         'price': product.price,
         'isFavourite': product.isFavourite,
       }),
     )
-        .then((value) {
+        .then((response) {
       final newProduct = Product(
         title: product.title,
         description: product.description,
         price: product.price,
         imageURL: product.imageURL,
-        id: DateTime.now().toString(),
+        id: json.decode(response.body)['name'],
       );
       _items.add(newProduct);
       // _items.insert(0, newProduct); // at the start of the list
       notifyListeners();
+    }).catchError((error) {
+      print(error);
+      throw error;
     });
   }
 

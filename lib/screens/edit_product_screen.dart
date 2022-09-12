@@ -14,8 +14,8 @@ class EditProductScreen extends StatefulWidget {
 class _EditProductScreenState extends State<EditProductScreen> {
   final _priceFocusNode = FocusNode();
   final _descriptionFocusNode = FocusNode();
-  final _imageUrlController = TextEditingController();
-  final _imageUrlFocusNode = FocusNode();
+  final _imageURLController = TextEditingController();
+  final _imageURLFocusNode = FocusNode();
   final _form = GlobalKey<FormState>();
   var _editedProduct = Product(
     id: null,
@@ -35,7 +35,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
   @override
   void initState() {
-    _imageUrlFocusNode.addListener(_updateImageUrl);
+    _imageURLFocusNode.addListener(_updateimageURL);
     super.initState();
   }
 
@@ -53,7 +53,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
           // 'imageURL': _editedProduct.imageURL,
           'imageURL': '',
         };
-        _imageUrlController.text = _editedProduct.imageURL;
+        _imageURLController.text = _editedProduct.imageURL;
       }
     }
     _isInit = false;
@@ -62,21 +62,21 @@ class _EditProductScreenState extends State<EditProductScreen> {
 
   @override
   void dispose() {
-    _imageUrlFocusNode.removeListener(_updateImageUrl);
+    _imageURLFocusNode.removeListener(_updateimageURL);
     _priceFocusNode.dispose();
     _descriptionFocusNode.dispose();
-    _imageUrlController.dispose();
-    _imageUrlFocusNode.dispose();
+    _imageURLController.dispose();
+    _imageURLFocusNode.dispose();
     super.dispose();
   }
 
-  void _updateImageUrl() {
-    if (!_imageUrlFocusNode.hasFocus) {
-      if ((!_imageUrlController.text.startsWith('http') &&
-              !_imageUrlController.text.startsWith('https')) ||
-          (!_imageUrlController.text.endsWith('.png') &&
-              !_imageUrlController.text.endsWith('.jpg') &&
-              !_imageUrlController.text.endsWith('.jpeg'))) {
+  void _updateimageURL() {
+    if (!_imageURLFocusNode.hasFocus) {
+      if ((!_imageURLController.text.startsWith('http') &&
+              !_imageURLController.text.startsWith('https')) ||
+          (!_imageURLController.text.endsWith('.png') &&
+              !_imageURLController.text.endsWith('.jpg') &&
+              !_imageURLController.text.endsWith('.jpeg'))) {
         return;
       }
       setState(() {});
@@ -92,7 +92,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
     setState(() {
       _isLoading = true;
     });
-
     if (_editedProduct.id != null) {
       Provider.of<Products>(context, listen: false)
           .updateProduct(_editedProduct.id, _editedProduct);
@@ -103,13 +102,30 @@ class _EditProductScreenState extends State<EditProductScreen> {
     } else {
       Provider.of<Products>(context, listen: false)
           .addProduct(_editedProduct)
-          .then((value) {
+          .catchError((error) {
+        return showDialog<Null>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text('An error occurred!'),
+            content: Text('Something went wrong.'),
+            actions: <Widget>[
+              TextButton(
+                child: Text('Okay'),
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                },
+              )
+            ],
+          ),
+        );
+      }).then((_) {
         setState(() {
           _isLoading = false;
         });
         Navigator.of(context).pop();
       });
     }
+    // Navigator.of(context).pop();
   }
 
   @override
@@ -231,11 +247,11 @@ class _EditProductScreenState extends State<EditProductScreen> {
                               color: Colors.grey,
                             ),
                           ),
-                          child: _imageUrlController.text.isEmpty
+                          child: _imageURLController.text.isEmpty
                               ? Text('Enter a URL')
                               : FittedBox(
                                   child: Image.network(
-                                    _imageUrlController.text,
+                                    _imageURLController.text,
                                     fit: BoxFit.cover,
                                   ),
                                 ),
@@ -245,8 +261,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
                             decoration: InputDecoration(labelText: 'Image URL'),
                             keyboardType: TextInputType.url,
                             textInputAction: TextInputAction.done,
-                            controller: _imageUrlController,
-                            focusNode: _imageUrlFocusNode,
+                            controller: _imageURLController,
+                            focusNode: _imageURLFocusNode,
                             onFieldSubmitted: (_) {
                               _saveForm();
                             },
