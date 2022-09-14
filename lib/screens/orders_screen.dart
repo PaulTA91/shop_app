@@ -13,42 +13,52 @@ class OrdersScreen extends StatefulWidget {
 }
 
 class _OrdersScreenState extends State<OrdersScreen> {
-  var _isLoading = false;
+  Future _ordersFuture;
+
+  Future _obtainOrdersFuture() {
+    return Provider.of<Orders>(context, listen: false).fetchAndSetOrders();
+  }
 
   @override
   void initState() {
-    Future.delayed(Duration.zero).then((_) async {
-      setState(() {
-        _isLoading = true;
-      });
-      await Provider.of<Orders>(context, listen: false).fetchAndSetOrders();
-      setState(() {
-        _isLoading = false;
-      });
-    });
+    _ordersFuture = _obtainOrdersFuture();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final orderData = Provider.of<Orders>(context);
+    print('Building Orders');
+    // final orderData = Provider.of<Orders>(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Your Orders",
+        appBar: AppBar(
+          title: Text(
+            "Your Orders",
+          ),
         ),
-      ),
-      drawer: AppDrawer(),
-      body: _isLoading
-          ? Center(
-              child: CircularProgressIndicator(),
-            )
-          : ListView.builder(
-              itemBuilder: (context, index) => OrderItem(
-                orderData.orders[index],
-              ),
-              itemCount: orderData.orders.length,
-            ),
-    );
+        drawer: AppDrawer(),
+        body: FutureBuilder(
+          future: _ordersFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            } else if (snapshot.error != null) {
+              // Error handling stuff
+              return Center(
+                child: Text("An error occured!"),
+              );
+            } else {
+              return Consumer<Orders>(
+                builder: ((context, orderData, child) => ListView.builder(
+                      itemBuilder: (context, index) => OrderItem(
+                        orderData.orders[index],
+                      ),
+                      itemCount: orderData.orders.length,
+                    )),
+              );
+            }
+          },
+        ));
   }
 }
