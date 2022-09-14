@@ -41,7 +41,7 @@ class Orders with ChangeNotifier {
               .map((cp) => {
                     'id': cp.id,
                     'title': cp.title,
-                    'qauntity': cp.quantity,
+                    'quantity': cp.quantity,
                     'price': cp.price,
                   })
               .toList(),
@@ -58,6 +58,41 @@ class Orders with ChangeNotifier {
         dateTime: timeStamp,
       ),
     );
+    notifyListeners();
+  }
+
+  Future<void> fetchAndSetOrders() async {
+    final url = Uri.parse(
+        'https://flutter-shop-app-87bde-default-rtdb.europe-west1.firebasedatabase.app/orders.json');
+    final response = await http.get(url);
+    final List<OrderItem> loadedOrders = [];
+    final extractedData = jsonDecode(response.body) as Map<String, dynamic>;
+
+    if (extractedData == null) {
+      return;
+    }
+    extractedData.forEach((orderID, orderData) {
+      loadedOrders.add(
+        OrderItem(
+          id: orderID,
+          amount: orderData['amount'],
+          products: (orderData['products'] as List<dynamic>)
+              .map(
+                (item) => CartItem(
+                  id: item['id'],
+                  title: item['title'],
+                  quantity: item['quantity'],
+                  price: item['price'],
+                ),
+              )
+              .toList(),
+          dateTime: DateTime.parse(
+            orderData['dateTime'],
+          ),
+        ),
+      );
+    });
+    _orders = loadedOrders.reversed.toList();
     notifyListeners();
   }
 }
