@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import '../models/http_exception.dart';
 import './product.dart';
 
 class Products with ChangeNotifier {
@@ -40,16 +41,16 @@ class Products with ChangeNotifier {
     //       'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
     // ),
   ];
-  // var _showFavoritesOnly = false;
+  // var _showFavouritesOnly = false;
 
   List<Product> get items {
-    // if (_showFavoritesOnly) {
+    // if (_showFavouritesOnly) {
     //   return _items.where((prodItem) => prodItem.isFavourite).toList();
     // }
     return [..._items];
   }
 
-  List<Product> get favoriteItems {
+  List<Product> get favouriteItems {
     return _items.where((prodItem) => prodItem.isFavourite).toList();
   }
 
@@ -58,12 +59,12 @@ class Products with ChangeNotifier {
   }
 
   // void showFavoritesOnly() {
-  //   _showFavoritesOnly = true;
+  //   _showFavouritesOnly = true;
   //   notifyListeners();
   // }
 
   // void showAll() {
-  //   _showFavoritesOnly = false;
+  //   _showFavouritesOnly = false;
   //   notifyListeners();
   // }
 
@@ -102,9 +103,9 @@ class Products with ChangeNotifier {
       body: json.encode({
         'title': product.title,
         'description': product.description,
-        'imageUrl': product.imageURL,
+        'imageURL': product.imageURL,
         'price': product.price,
-        'isFavorite': product.isFavourite,
+        'isFavourite': product.isFavourite,
       }),
     )
         .then((response) {
@@ -143,8 +144,23 @@ class Products with ChangeNotifier {
     }
   }
 
-  void deleteProduct(String id) {
-    _items.removeWhere((prod) => prod.id == id);
+  Future<void> deleteProduct(String id) async {
+    final url = Uri.parse(
+        'https://flutter-shop-app-87bde-default-rtdb.europe-west1.firebasedatabase.app/products/$id.json');
+    final existingProductIndex =
+        _items.indexWhere((element) => element.id == id);
+    var existingProduct = _items[existingProductIndex];
+
+    _items.removeAt(existingProductIndex);
     notifyListeners();
+
+    final response = await http.delete(url);
+
+    if (response.statusCode >= 400) {
+      _items.insert(existingProductIndex, existingProduct);
+      notifyListeners();
+      throw HttpException("Could not delete product.");
+    }
+    existingProduct = null;
   }
 }
