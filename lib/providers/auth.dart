@@ -23,6 +23,10 @@ class Auth with ChangeNotifier {
     return null;
   }
 
+  String get userID {
+    return _userID;
+  }
+
   Future<void> _autheticate(
       String email, String password, String urlSegment) async {
     final url = Uri.parse(
